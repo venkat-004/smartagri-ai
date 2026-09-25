@@ -480,24 +480,19 @@ def api_field():
 def api_predict_disease():
     if "leaf" not in request.files:
         return jsonify({"error": "No leaf image uploaded"}), 400
+
     file = request.files["leaf"]
     file_bytes = file.read()
+
     if not file_bytes:
         return jsonify({"error": "Empty file"}), 400
 
     disease_name, confidence, treatment = simulate_disease_prediction(file_bytes)
 
-    db = get_db()
-    db.execute(
-        "INSERT INTO disease_scans (disease_name, confidence, created_at) VALUES (?, ?, ?)",
-        (disease_name, confidence, datetime.utcnow().isoformat()),
-    )
-    db.commit()
-
     return jsonify({
         "disease_name": disease_name,
         "confidence": confidence,
-        "treatment": treatment,
+        "treatment": treatment
     })
 
 
