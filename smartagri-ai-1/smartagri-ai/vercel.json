@@ -2,18 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "app.py",
+      "src": "smartagri-ai-1/smartagri-ai/app.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "app.py"
+      "dest": "smartagri-ai-1/smartagri-ai/app.py"
     }
   ]
 }
