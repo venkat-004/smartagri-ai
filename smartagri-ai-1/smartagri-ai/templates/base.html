@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartAgri AI</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌾</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <p class="app-name mb-0"><span aria-hidden="true">🌾</span> <span data-i18n="app_name">SmartAgri AI</span></p>
+        <p class="tagline" data-i18n="tagline">Your AI companion for smarter farming</p>
+      </div>
+      <a href="{{ url_for('index') }}" class="lang-switch-btn text-decoration-none">
+        <i class="fa-solid fa-language"></i> <span id="currentLangLabel">English</span>
+      </a>
+    </div>
+  </header>
+
+  <nav class="app-nav">
+    <div class="container">
+      <a class="nav-link {{ 'active' if active == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}">
+        <i class="fa-solid fa-house"></i> <span data-i18n="nav_dashboard">Dashboard</span>
+      </a>
+      <a class="nav-link {{ 'active' if active == 'crop' else '' }}" href="{{ url_for('crop') }}">
+        <i class="fa-solid fa-seedling"></i> <span data-i18n="nav_crop">Crop Prediction</span>
+      </a>
+      <a class="nav-link {{ 'active' if active == 'disease' else '' }}" href="{{ url_for('disease') }}">
+        <i class="fa-solid fa-magnifying-glass-chart"></i> <span data-i18n="nav_disease">Disease Scan</span>
+      </a>
+      <a class="nav-link {{ 'active' if active == 'fertilizer' else '' }}" href="{{ url_for('fertilizer') }}">
+        <i class="fa-solid fa-flask"></i> <span data-i18n="nav_fertilizer">Fertilizer</span>
+      </a>
+      <a class="nav-link {{ 'active' if active == 'weather' else '' }}" href="{{ url_for('weather') }}">
+        <i class="fa-solid fa-cloud-sun"></i> <span data-i18n="nav_weather">Weather</span>
+      </a>
+      <a class="nav-link {{ 'active' if active == 'voice' else '' }}" href="{{ url_for('voice') }}">
+        <i class="fa-solid fa-microphone"></i> <span data-i18n="nav_voice">Voice Assistant</span>
+      </a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container" data-i18n="footer_note">Prototype for demonstration — predictions are simulated for now.</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

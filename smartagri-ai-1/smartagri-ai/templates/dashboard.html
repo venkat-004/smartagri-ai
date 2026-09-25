@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="section-title" data-i18n="welcome_title">Welcome back, Farmer</h2>
+<p class="section-sub" data-i18n="welcome_sub">Track your field, spot disease early, and plan around the weather.</p>
+
+<h3 class="h5 mb-3" data-i18n="field_overview">Field Overview</h3>
+<div class="row g-3 mb-4" id="fieldOverview">
+  <div class="col-6 col-md-3">
+    <div class="field-card">
+      <div class="field-label" data-i18n="village">Village</div>
+      <div class="field-value" id="ov-village">{{ field.village if field else '—' }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="field-card">
+      <div class="field-label" data-i18n="crop_name">Crop</div>
+      <div class="field-value" id="ov-crop">{{ field.crop_name if field else '—' }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="field-card">
+      <div class="field-label" data-i18n="soil_moisture">Soil Moisture</div>
+      <div class="field-value" id="ov-moisture">{{ (field.soil_moisture ~ '%') if field else '—' }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="field-card">
+      <div class="field-label" data-i18n="temperature">Temperature</div>
+      <div class="field-value" id="ov-temp">{{ (field.temperature ~ '°C') if field else '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="alert-irrigation {{ field.alert_level if field else 'ok' }} mb-4" id="irrigationAlert">
+  <i class="fa-solid fa-droplet"></i>
+  <span data-i18n="irrigation_alert">Irrigation Alert</span>:
+  <span id="irrigationText">{{ field.alert_text if field else 'Add your field data to get an irrigation alert.' }}</span>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="action-card">
+      <h3 class="h5 mb-3" data-i18n="update_field">Update Field Data</h3>
+      <form id="fieldForm">
+        <div class="mb-3">
+          <label class="form-label" data-i18n="village">Village</label>
+          <input type="text" class="form-control" id="in-village" value="{{ field.village if field else '' }}" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" data-i18n="crop_name">Crop</label>
+          <input type="text" class="form-control" id="in-crop" value="{{ field.crop_name if field else '' }}" required>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-4">
+            <label class="form-label" data-i18n="soil_moisture">Soil Moisture %</label>
+            <input type="number" min="0" max="100" class="form-control" id="in-moisture" value="{{ field.soil_moisture if field else 40 }}" required>
+          </div>
+          <div class="col-4">
+            <label class="form-label" data-i18n="temperature">Temp °C</label>
+            <input type="number" class="form-control" id="in-temp" value="{{ field.temperature if field else 28 }}" required>
+          </div>
+          <div class="col-4">
+            <label class="form-label" data-i18n="humidity">Humidity %</label>
+            <input type="number" min="0" max="100" class="form-control" id="in-humidity" value="{{ field.humidity if field else 55 }}" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-forest" data-i18n="save">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <h3 class="h5 mb-3" data-i18n="quick_actions">Quick Actions</h3>
+    <div class="row g-3">
+      <div class="col-sm-4">
+        <a href="{{ url_for('crop') }}" class="text-decoration-none">
+          <div class="action-card text-center">
+            <div class="action-icon">🌾</div>
+            <div class="fw-semibold text-dark" data-i18n="predict_crop_cta">Predict a suitable crop</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-sm-4">
+        <a href="{{ url_for('disease') }}" class="text-decoration-none">
+          <div class="action-card text-center">
+            <div class="action-icon">🔬</div>
+            <div class="fw-semibold text-dark" data-i18n="scan_leaf_cta">Scan a leaf for disease</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-sm-4">
+        <a href="{{ url_for('fertilizer') }}" class="text-decoration-none">
+          <div class="action-card text-center">
+            <div class="action-icon">🧪</div>
+            <div class="fw-semibold text-dark" data-i18n="fertilizer_cta">Get fertilizer guidance</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-sm-4">
+        <a href="{{ url_for('weather') }}" class="text-decoration-none">
+          <div class="action-card text-center">
+            <div class="action-icon">⛅</div>
+            <div class="fw-semibold text-dark" data-i18n="check_weather_cta">Check today's weather</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-sm-4">
+        <a href="{{ url_for('voice') }}" class="text-decoration-none">
+          <div class="action-card text-center">
+            <div class="action-icon">🎙️</div>
+            <div class="fw-semibold text-dark" data-i18n="ask_voice_cta">Ask the voice assistant</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('fieldForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = {
+    village: document.getElementById('in-village').value,
+    crop_name: document.getElementById('in-crop').value,
+    soil_moisture: parseFloat(document.getElementById('in-moisture').value),
+    temperature: parseFloat(document.getElementById('in-temp').value),
+    humidity: parseFloat(document.getElementById('in-humidity').value),
+  };
+  const res = await fetch("{{ url_for('api_field') }}", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (data.ok) {
+    document.getElementById('ov-village').textContent = data.field.village;
+    document.getElementById('ov-crop').textContent = data.field.crop_name;
+    document.getElementById('ov-moisture').textContent = data.field.soil_moisture + '%';
+    document.getElementById('ov-temp').textContent = data.field.temperature + '°C';
+    const alertBox = document.getElementById('irrigationAlert');
+    alertBox.className = 'alert-irrigation ' + data.field.alert_level + ' mb-4';
+    const dict = SMARTAGRI_I18N[smartagriGetLang()] || SMARTAGRI_I18N.en;
+    document.getElementById('irrigationText').textContent = dict[data.field.alert_key] || data.field.alert_text;
+  }
+});
+</script>
+{% endblock %}

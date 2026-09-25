@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="section-title" data-i18n="crop_title">AI Crop Prediction</h2>
+<p class="section-sub" data-i18n="crop_sub">Enter your soil and weather readings to get a suggested crop.</p>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="action-card">
+      <form id="cropForm">
+        <div class="row g-2 mb-2">
+          <div class="col-4">
+            <label class="form-label" data-i18n="nitrogen">Nitrogen (N)</label>
+            <input type="number" class="form-control" id="in-n" value="90" required>
+          </div>
+          <div class="col-4">
+            <label class="form-label" data-i18n="phosphorus">Phosphorus (P)</label>
+            <input type="number" class="form-control" id="in-p" value="42" required>
+          </div>
+          <div class="col-4">
+            <label class="form-label" data-i18n="potassium">Potassium (K)</label>
+            <input type="number" class="form-control" id="in-k" value="43" required>
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label" data-i18n="soil_ph">Soil pH</label>
+          <input type="number" step="0.1" class="form-control" id="in-ph" value="6.5" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label" data-i18n="temperature">Temperature °C</label>
+          <input type="number" step="0.1" class="form-control" id="in-temp" value="27" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" data-i18n="rainfall">Rainfall (mm)</label>
+          <input type="number" step="0.1" class="form-control" id="in-rain" value="210" required>
+        </div>
+        <button type="submit" class="btn btn-forest w-100" id="predictBtn" data-i18n="predict_crop">Predict Suitable Crop</button>
+        <div class="text-center mt-3 d-none" id="predictingNote">
+          <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+          <span data-i18n="predicting">Predicting…</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="result-panel d-none" id="resultPanel">
+      <h3 class="h5 mb-3" data-i18n="result">Result</h3>
+      <div class="mb-3">
+        <span class="field-label" data-i18n="recommended_crop">Recommended crop</span>
+        <div class="fw-bold fs-4" id="res-crop"></div>
+      </div>
+      <div class="mb-3">
+        <span class="field-label" data-i18n="confidence">Confidence</span>
+        <div class="d-flex align-items-center gap-2">
+          <div class="confidence-bar flex-grow-1"><span id="res-confidence-bar" style="width:0%"></span></div>
+          <span id="res-confidence-text" class="fw-semibold"></span>
+        </div>
+      </div>
+      <div>
+        <span class="field-label" data-i18n="why_this_crop">Why this crop</span>
+        <div id="res-reason"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const cropForm = document.getElementById('cropForm');
+const predictBtn = document.getElementById('predictBtn');
+const predictingNote = document.getElementById('predictingNote');
+const resultPanel = document.getElementById('resultPanel');
+
+cropForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = {
+    n: parseFloat(document.getElementById('in-n').value),
+    p: parseFloat(document.getElementById('in-p').value),
+    k: parseFloat(document.getElementById('in-k').value),
+    ph: parseFloat(document.getElementById('in-ph').value),
+    temperature: parseFloat(document.getElementById('in-temp').value),
+    rainfall: parseFloat(document.getElementById('in-rain').value),
+    lang: smartagriGetLang(),
+  };
+  resultPanel.classList.add('d-none');
+  predictingNote.classList.remove('d-none');
+  predictBtn.disabled = true;
+
+  try {
+    const res = await fetch("{{ url_for('api_predict_crop') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    document.getElementById('res-crop').textContent = data.crop;
+    document.getElementById('res-confidence-bar').style.width = data.confidence + '%';
+    document.getElementById('res-confidence-text').textContent = data.confidence + '%';
+    document.getElementById('res-reason').textContent = data.reason;
+    resultPanel.classList.remove('d-none');
+  } finally {
+    predictingNote.classList.add('d-none');
+    predictBtn.disabled = false;
+  }
+});
+</script>
+{% endblock %}

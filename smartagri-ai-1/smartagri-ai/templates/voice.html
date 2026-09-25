@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="section-title">🎙️ Multilingual AI Farming Assistant</h2>
+
+<div class="voice-demo-card">
+  <div class="mic-icon-wrap">
+    <i class="fa-solid fa-microphone fa-3x"></i>
+  </div>
+
+  <p class="demo-instruction" data-i18n="tap_to_speak">Tap the button and try the demo</p>
+
+  <button class="btn btn-forest btn-lg w-100 mb-2" id="micBtn">
+    <i class="fa-solid fa-microphone"></i> <span data-i18n="tap_to_speak">Start Voice Demo</span>
+  </button>
+
+  <button class="btn btn-outline-forest btn-lg w-100" id="replayBtn">
+    <i class="fa-solid fa-volume-high"></i> <span data-i18n="hear_again">Hear AI Answer</span>
+  </button>
+
+  <div class="transcript-panel mt-3 d-none" id="transcriptPanel">
+    <div class="mb-2">
+      <span class="field-label" data-i18n="you_said">You said</span>
+      <div class="fw-semibold" id="youSaid"></div>
+    </div>
+    <div>
+      <span class="field-label" data-i18n="ai_answer">Assistant's answer</span>
+      <div id="aiAnswer"></div>
+    </div>
+  </div>
+
+  <div class="alert alert-warning mt-3 d-none" id="unsupportedNote" data-i18n="voice_not_supported">
+    Voice input isn't supported in this browser. Try Chrome on Android or desktop.
+  </div>
+</div>
+
+<div class="example-card mt-4">
+  <p class="fw-bold mb-1">Example question:</p>
+  <p class="fst-italic">"Which crop is suitable for my soil?"</p>
+  <p class="fw-bold mb-1 mt-3">Demo answer:</p>
+  <p>Based on the sample soil and rainfall values, rice is recommended for this demonstration.</p>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const micBtn = document.getElementById('micBtn');
+const statusText = document.querySelector('.demo-instruction');
+const transcriptPanel = document.getElementById('transcriptPanel');
+const youSaid = document.getElementById('youSaid');
+const aiAnswer = document.getElementById('aiAnswer');
+const warnBox = document.getElementById('warnBox');
+const replayBtn = document.getElementById('replayBtn');
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let lastAnswer = "";
+let isListening = false;
+
+function speak(text, lang) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = SMARTAGRI_VOICE_LOCALE[lang] || 'en-IN';
+  window.speechSynthesis.speak(utter);
+}
+
+async function askAssistant(question, lang) {
+  const res = await fetch("{{ url_for('api_voice_query') }}", {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, lang })
+  });
+  const data = await res.json();
+  return data.answer;
+}
+
+if (!SpeechRecognition) {
+  if (warnBox) {
+    warnBox.textContent = "Voice input isn't supported in this browser. Try Chrome on Android or desktop.";
+    warnBox.classList.remove('d-none');
+  }
+  micBtn.disabled = true;
+} else {
+  const recognition = new SpeechRecognition();
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  micBtn.addEventListener('click', () => {
+    if (isListening) {
+      console.log("Already listening, ignoring click");
+      return;
+    }
+    const lang = smartagriGetLang();
+    recognition.lang = SMARTAGRI_VOICE_LOCALE[lang] || 'en-IN';
+    const dict = SMARTAGRI_I18N[lang] || SMARTAGRI_I18N.en;
+    if (statusText) statusText.textContent = dict.listening;
+    micBtn.classList.add('recording');
+    if (warnBox) warnBox.classList.add('d-none');
+    try {
+      recognition.start();
+      isListening = true;
+      console.log("Recognition started");
+    } catch (e) {
+      console.error("start() failed:", e);
+      isListening = false;
+    }
+  });
+
+  recognition.addEventListener('result', async (event) => {
+    const said = event.results[0][0].transcript;
+    const lang = smartagriGetLang();
+    console.log("Heard:", said);
+    youSaid.textContent = said;
+    transcriptPanel.classList.remove('d-none');
+    aiAnswer.textContent = '…';
+    const answer = await askAssistant(said, lang);
+    console.log("Answer:", answer);
+    lastAnswer = answer;
+    aiAnswer.textContent = answer;
+    speak(answer, lang);
+  });
+
+  recognition.addEventListener('error', (event) => {
+    isListening = false;
+    console.error("Recognition error:", event.error);
+    let msg = "Something went wrong (" + event.error + "). Please try again.";
+    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+      msg = "Microphone access was blocked. Please allow microphone permission for this page.";
+    } else if (event.error === 'no-speech') {
+      msg = "No speech detected. Tap the mic and try again.";
+    }
+    if (warnBox) {
+      warnBox.textContent = msg;
+      warnBox.classList.remove('d-none');
+    }
+  });
+
+  recognition.addEventListener('end', () => {
+    isListening = false;
+    micBtn.classList.remove('recording');
+    const dict = SMARTAGRI_I18N[smartagriGetLang()] || SMARTAGRI_I18N.en;
+    if (statusText) statusText.textContent = dict.tap_to_speak;
+    console.log("Recognition ended");
+  });
+}
+
+replayBtn.addEventListener('click', () => {
+  if (lastAnswer) speak(lastAnswer, smartagriGetLang());
+});
+</script>
+{% endblock %}

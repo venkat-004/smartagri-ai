@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="section-title" data-i18n="disease_title">Leaf Disease Detection</h2>
+<p class="section-sub" data-i18n="disease_sub">Upload a photo of the leaf and get an instant AI reading.</p>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="action-card">
+      <label class="form-label" data-i18n="choose_leaf_image">Choose leaf image</label>
+      <input type="file" accept="image/*" class="form-control mb-3" id="leafInput">
+      <div class="leaf-preview mb-3" id="leafPreview">
+        <span><i class="fa-solid fa-image"></i></span>
+      </div>
+      <button class="btn btn-forest w-100" id="analyzeBtn" data-i18n="analyze_leaf">Analyze Leaf</button>
+      <div class="text-center mt-3 d-none" id="analyzingNote">
+        <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+        <span data-i18n="analyzing">Analyzing leaf…</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="result-panel d-none" id="resultPanel">
+      <h3 class="h5 mb-3" data-i18n="result">Result</h3>
+      <div class="mb-2">
+        <span class="field-label" data-i18n="disease_name">Detected condition</span>
+        <div class="fw-bold fs-5" id="res-disease"></div>
+      </div>
+      <div class="mb-3">
+        <span class="field-label" data-i18n="confidence">Confidence</span>
+        <div class="d-flex align-items-center gap-2">
+          <div class="confidence-bar flex-grow-1"><span id="res-confidence-bar" style="width:0%"></span></div>
+          <span id="res-confidence-text" class="fw-semibold"></span>
+        </div>
+      </div>
+      <div>
+        <span class="field-label" data-i18n="treatment">Suggested treatment</span>
+        <div id="res-treatment"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const leafInput = document.getElementById('leafInput');
+const leafPreview = document.getElementById('leafPreview');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const resultPanel = document.getElementById('resultPanel');
+const analyzingNote = document.getElementById('analyzingNote');
+let leafFile = null;
+
+leafInput.addEventListener('change', () => {
+  leafFile = leafInput.files[0];
+  if (!leafFile) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    leafPreview.innerHTML = `<img src="${e.target.result}" alt="leaf preview">`;
+  };
+  reader.readAsDataURL(leafFile);
+});
+
+analyzeBtn.addEventListener('click', async () => {
+  const dict = SMARTAGRI_I18N[smartagriGetLang()] || SMARTAGRI_I18N.en;
+  if (!leafFile) {
+    alert(dict.no_image_selected);
+    return;
+  }
+  resultPanel.classList.add('d-none');
+  analyzingNote.classList.remove('d-none');
+
+  const formData = new FormData();
+  formData.append('leaf', leafFile);
+
+  try {
+    const res = await fetch("{{ url_for('api_predict_disease') }}", { method: 'POST', body: formData });
+    const data = await res.json();
+    document.getElementById('res-disease').textContent = data.disease_name;
+    document.getElementById('res-confidence-bar').style.width = data.confidence + '%';
+    document.getElementById('res-confidence-text').textContent = data.confidence + '%';
+    document.getElementById('res-treatment').textContent = data.treatment;
+    resultPanel.classList.remove('d-none');
+  } finally {
+    analyzingNote.classList.add('d-none');
+  }
+});
+</script>
+{% endblock %}

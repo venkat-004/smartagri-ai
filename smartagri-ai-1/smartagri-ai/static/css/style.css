@@ -1,0 +1,407 @@
+/* ============================================================
+   SmartAgri AI — design tokens
+   Palette grounded in field & harvest: deep forest, harvest gold,
+   soil brown, warm paper, muted sky teal for weather.
+   Type: Fraunces (display serif, carries personality) + Inter (UI).
+   ============================================================ */
+:root {
+  --forest: #1f4b3f;
+  --forest-dark: #12281f;
+  --forest-tint: #e7efe9;
+  --harvest: #d8a13a;
+  --harvest-dark: #a97a1f;
+  --soil: #6b4a2e;
+  --paper: #f6f2e9;
+  --card: #ffffff;
+  --sky: #4c7c82;
+  --ink: #1c2620;
+  --ink-soft: #4d5a52;
+  --line: #dcd4c2;
+  --danger: #b34a3c;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --shadow: 0 1px 0 rgba(28, 38, 32, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.55;
+}
+
+h1, h2, h3, .display-serif {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  color: var(--forest-dark);
+  letter-spacing: -0.01em;
+}
+
+a { color: var(--forest); }
+
+/* ---------- Language gate ---------- */
+.lang-gate {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, var(--forest-dark) 0%, var(--forest) 100%);
+  padding: 32px 16px;
+}
+
+.lang-gate-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.lang-gate-mark {
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+}
+
+.lang-gate-card h1 {
+  font-size: 1.9rem;
+  margin-bottom: 4px;
+}
+
+.lang-gate-sub {
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+  font-size: 0.98rem;
+}
+
+.lang-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.lang-option {
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  padding: 16px 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.lang-option .lang-native {
+  display: block;
+  font-size: 1.15rem;
+}
+
+.lang-option .lang-en {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.lang-option:hover { border-color: var(--forest); }
+
+.lang-option.selected {
+  border-color: var(--forest);
+  background: var(--forest-tint);
+}
+
+.btn-forest {
+  background: var(--forest);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: var(--radius-sm);
+  width: 100%;
+  transition: background 0.15s ease;
+}
+
+.btn-forest:hover { background: var(--forest-dark); color: #fff; }
+
+.btn-harvest {
+  background: var(--harvest);
+  border: none;
+  color: var(--forest-dark);
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-harvest:hover { background: var(--harvest-dark); color: #fff; }
+
+.btn-outline-forest {
+  background: transparent;
+  border: 1.5px solid var(--forest);
+  color: var(--forest);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 9px 18px;
+}
+.btn-outline-forest:hover { background: var(--forest-tint); }
+
+/* ---------- App shell ---------- */
+.app-header {
+  background: var(--forest);
+  color: #fff;
+  padding: 18px 0 14px;
+}
+
+.app-header .app-name {
+  font-family: "Fraunces", serif;
+  font-size: 1.5rem;
+  color: #fff;
+  margin: 0;
+}
+
+.app-header .tagline {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.lang-switch-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.app-nav {
+  background: var(--forest-tint);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+}
+
+.app-nav .nav-link {
+  color: var(--forest-dark);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-nav .nav-link.active,
+.app-nav .nav-link:hover {
+  background: var(--forest);
+  color: #fff;
+}
+
+main { padding: 28px 0 56px; }
+
+/* ---------- Cards: flat, bordered, left accent bar instead of shadow-kit ---------- */
+.field-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--forest);
+  border-radius: var(--radius-sm);
+  padding: 20px 22px;
+  height: 100%;
+}
+
+.field-card .field-label {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-bottom: 2px;
+}
+
+.field-card .field-value {
+  font-family: "Fraunces", serif;
+  font-size: 1.6rem;
+  color: var(--forest-dark);
+}
+
+.action-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  height: 100%;
+}
+
+.action-card .action-icon {
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.alert-irrigation {
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  font-weight: 600;
+  border-left: 4px solid var(--harvest);
+  background: #fbf4e2;
+  color: var(--soil);
+}
+
+.alert-irrigation.low { border-left-color: var(--danger); background: #f8e9e6; color: var(--danger); }
+.alert-irrigation.ok { border-left-color: var(--forest); background: var(--forest-tint); color: var(--forest-dark); }
+.alert-irrigation.high { border-left-color: var(--sky); background: #e9f1f2; color: var(--sky); }
+
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.section-sub {
+  color: var(--ink-soft);
+  margin-bottom: 22px;
+  max-width: 62ch;
+}
+
+.form-control, .form-select {
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--forest);
+  box-shadow: 0 0 0 3px rgba(31, 75, 63, 0.15);
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+/* ---------- Disease detection ---------- */
+.leaf-preview {
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius-sm);
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  overflow: hidden;
+  background: var(--forest-tint);
+}
+
+.leaf-preview img { max-width: 100%; max-height: 260px; }
+
+.result-panel {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--harvest);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  background: var(--card);
+}
+
+.confidence-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--line);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.confidence-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--forest);
+}
+
+/* ---------- Weather ---------- */
+.weather-hero {
+  background: var(--sky);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 26px 28px;
+}
+
+.weather-hero .temp-big {
+  font-family: "Fraunces", serif;
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.weather-metric {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+}
+
+/* ---------- Voice assistant ---------- */
+.voice-stage {
+  text-align: center;
+  padding: 36px 20px;
+}
+
+.mic-btn {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: none;
+  background: var(--forest);
+  color: #fff;
+  font-size: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.mic-btn.recording {
+  background: var(--danger);
+  animation: pulse-mic 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-mic {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(179, 74, 60, 0.35); }
+  50% { box-shadow: 0 0 0 14px rgba(179, 74, 60, 0); }
+}
+
+.transcript-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  background: var(--card);
+  text-align: left;
+  margin-top: 22px;
+}
+
+/* ---------- Footer ---------- */
+.app-footer {
+  border-top: 1px solid var(--line);
+  padding: 16px 0;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mic-btn.recording { animation: none; }
+}
+
+@media (max-width: 576px) {
+  .lang-options { grid-template-columns: 1fr; }
+  .weather-hero .temp-big { font-size: 2.3rem; }
+}
+.voice-demo-card {
+  background: #f0f5f0;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+}
+.mic-icon-wrap { color: #6b7f8f; margin-bottom: 1rem; }
+.demo-instruction { font-weight: 600; margin-bottom: 1.25rem; }
+.example-card {
+  background: #eaf3ea;
+  border-radius: 16px;
+  padding: 1.5rem;
+}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="section-title" data-i18n="fertilizer_title">Fertilizer Recommendation</h2>
+<p class="section-sub" data-i18n="fertilizer_sub">Choose your crop and soil pH for an N-P-K guidance note.</p>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="action-card">
+      <form id="fertilizerForm">
+        <div class="mb-3">
+          <label class="form-label" data-i18n="select_crop">Select Crop</label>
+          <select class="form-select" id="in-crop">
+            <option value="rice">Rice</option>
+            <option value="wheat">Wheat</option>
+            <option value="maize">Maize</option>
+            <option value="cotton">Cotton</option>
+            <option value="sugarcane">Sugarcane</option>
+            <option value="groundnut">Groundnut</option>
+            <option value="pulses">Pulses</option>
+            <option value="vegetables">Vegetables</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" data-i18n="soil_ph">Soil pH</label>
+          <input type="number" step="0.1" class="form-control" id="in-ph" value="6.5" required>
+        </div>
+        <button type="submit" class="btn btn-forest w-100" id="guidanceBtn" data-i18n="get_guidance">Get Guidance</button>
+        <div class="text-center mt-3 d-none" id="guidanceNote">
+          <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+          <span data-i18n="getting_guidance">Getting guidance…</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="result-panel d-none" id="resultPanel">
+      <h3 class="h5 mb-3" data-i18n="result">Result</h3>
+      <div class="mb-3">
+        <span class="field-label" data-i18n="recommended_fertilizer">Recommended fertilizer</span>
+        <div class="fw-bold fs-5" id="res-fertilizer"></div>
+      </div>
+      <div>
+        <span class="field-label" data-i18n="application_tip">Application tip</span>
+        <div id="res-tip"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const cropSelect = document.getElementById('in-crop');
+const cropLabels = {
+  en: { rice: "Rice", wheat: "Wheat", maize: "Maize", cotton: "Cotton", sugarcane: "Sugarcane", groundnut: "Groundnut", pulses: "Pulses", vegetables: "Vegetables" },
+  te: { rice: "వరి", wheat: "గోధుమ", maize: "మొక్కజొన్న", cotton: "పత్తి", sugarcane: "చెరకు", groundnut: "వేరుశనగ", pulses: "పప్పుధాన్యాలు", vegetables: "కూరగాయలు" },
+  ta: { rice: "நெல்", wheat: "கோதுமை", maize: "சோளம்", cotton: "பருத்தி", sugarcane: "கரும்பு", groundnut: "நிலக்கடலை", pulses: "பருப்பு வகைகள்", vegetables: "காய்கறிகள்" },
+  hi: { rice: "धान", wheat: "गेहूं", maize: "मक्का", cotton: "कपास", sugarcane: "गन्ना", groundnut: "मूंगफली", pulses: "दलहन", vegetables: "सब्ज़ियां" },
+};
+
+function applyCropLabels() {
+  const lang = smartagriGetLang();
+  const labels = cropLabels[lang] || cropLabels.en;
+  Array.from(cropSelect.options).forEach(opt => {
+    if (labels[opt.value]) opt.textContent = labels[opt.value];
+  });
+}
+applyCropLabels();
+
+const fertilizerForm = document.getElementById('fertilizerForm');
+const guidanceBtn = document.getElementById('guidanceBtn');
+const guidanceNote = document.getElementById('guidanceNote');
+const resultPanel = document.getElementById('resultPanel');
+
+fertilizerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = {
+    crop: cropSelect.value,
+    ph: parseFloat(document.getElementById('in-ph').value),
+    lang: smartagriGetLang(),
+  };
+  resultPanel.classList.add('d-none');
+  guidanceNote.classList.remove('d-none');
+  guidanceBtn.disabled = true;
+
+  try {
+    const res = await fetch("{{ url_for('api_fertilizer') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    document.getElementById('res-fertilizer').textContent = data.fertilizer;
+    document.getElementById('res-tip').textContent = data.tip;
+    resultPanel.classList.remove('d-none');
+  } finally {
+    guidanceNote.classList.add('d-none');
+    guidanceBtn.disabled = false;
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="section-title" data-i18n="weather_title">Weather & Farming Advice</h2>
+<p class="section-sub" data-i18n="weather_sub">Live conditions for your village, with guidance for today's work.</p>
+
+<div class="row g-2 mb-4">
+  <div class="col-sm-8 col-md-6">
+    <input type="text" class="form-control" id="villageInput" data-i18n-placeholder="enter_village" placeholder="Enter village or city" value="{{ field.village if field else '' }}">
+  </div>
+  <div class="col-sm-4 col-md-3">
+    <button class="btn btn-forest w-100" id="getWeatherBtn" data-i18n="get_weather">Get Weather</button>
+  </div>
+</div>
+
+<div class="text-center mb-3 d-none" id="weatherLoading">
+  <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+  <span data-i18n="fetching_weather">Fetching live weather…</span>
+</div>
+
+<div id="weatherResult" class="d-none">
+  <div class="weather-hero mb-4">
+    <div class="row align-items-center">
+      <div class="col-auto">
+        <div class="temp-big" id="w-temp">--°</div>
+      </div>
+      <div class="col">
+        <div class="fw-semibold" id="w-place">—</div>
+        <div id="w-condition" style="opacity:.9;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+      <div class="weather-metric">
+        <div class="field-label" data-i18n="rain_chance">Chance of rain</div>
+        <div class="field-value" id="w-rain">—</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="weather-metric">
+        <div class="field-label" data-i18n="wind_speed">Wind speed</div>
+        <div class="field-value" id="w-wind">—</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="weather-metric">
+        <div class="field-label" data-i18n="humidity">Humidity</div>
+        <div class="field-value" id="w-humidity">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-panel">
+    <div class="field-label mb-1" data-i18n="farming_advice">Farming advice</div>
+    <div id="w-advice" class="fw-semibold"></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const villageInput = document.getElementById('villageInput');
+const getWeatherBtn = document.getElementById('getWeatherBtn');
+const weatherLoading = document.getElementById('weatherLoading');
+const weatherResult = document.getElementById('weatherResult');
+
+async function fetchWeather() {
+  const village = villageInput.value.trim();
+  if (!village) { villageInput.focus(); return; }
+  weatherResult.classList.add('d-none');
+  weatherLoading.classList.remove('d-none');
+  try {
+    const res = await fetch("{{ url_for('api_weather') }}?village=" + encodeURIComponent(village) + "&lang=" + smartagriGetLang());
+    const data = await res.json();
+    if (data.error) { alert(data.error); return; }
+    document.getElementById('w-temp').textContent = Math.round(data.temperature) + '°C';
+    document.getElementById('w-place').textContent = data.place;
+    document.getElementById('w-condition').textContent = data.condition;
+    document.getElementById('w-rain').textContent = data.rain_chance + '%';
+    document.getElementById('w-wind').textContent = data.wind_speed + ' km/h';
+    document.getElementById('w-humidity').textContent = data.humidity + '%';
+    document.getElementById('w-advice').textContent = data.advice;
+    weatherResult.classList.remove('d-none');
+  } catch (err) {
+    alert('Could not fetch weather right now.');
+  } finally {
+    weatherLoading.classList.add('d-none');
+  }
+}
+
+getWeatherBtn.addEventListener('click', fetchWeather);
+villageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchWeather(); });
+
+if (villageInput.value) fetchWeather();
+</script>
+{% endblock %}
